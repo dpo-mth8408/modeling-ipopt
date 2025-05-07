@@ -2,7 +2,7 @@
 title: "Rapport de laboratoire 1: modélisation et résolution de problèmes avec IPOPT"
 subtitle: "MTH8408"
 author:
-  - name: Votre nom
+  - name: Dominique Orban
     email: votre.adresse@polymtl.ca
     affiliation:
       - name: Polytechnique Montréal
