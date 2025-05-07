@@ -1,0 +1,59 @@
+---
+title: "Rapport de laboratoire 1: modélisation et résolution de problèmes avec IPOPT"
+subtitle: "MTH8408"
+author:
+  - name: Votre nom
+    email: votre.adresse@polymtl.ca
+    affiliation:
+      - name: Polytechnique Montréal
+format:
+  pdf:
+    keep-tex: false
+    documentclass: scrartcl
+    geometry:
+      - margin=1in
+    papersize: letter
+    colorlinks: true
+    urlcolor: blue
+engine: julia
+---
+
+```{julia}
+#| output: false
+using Pkg
+Pkg.activate("rapport_env")    # activate a virtual environment
+```
+
+# Modélisation d'un problème avec contraintes
+
+Modéliser le problème
+$$
+\min_{x \in \mathbb{R}^2} \ (x_1 - 2)^2 + (x_2 - 1)^2 \quad \text{s.c.} \ x_1^2 - x_2 \leq 0, \ x_1 + x_2 \leq 2
+$$
+à l'aide de [`ADNLPModels.jl`](https://github.com/JuliaSmoothOptimizers/ADNLPModels.jl) et le résoudre avec IPOPT à l'aide de [`NLPModelsIpopt.jl`](https://github.com/JuliaSmoothOptimizers/NLPModelsIpopt.jl).
+Vous pouvez fournir à IPOPT un point initial de votre choix.
+
+<!--
+Nous avons vu en classe comment modéliser un problème sans contraintes.
+Dirigez-vous vers https://jso.dev/ADNLPModels.jl/stable/ pour découvrir comment modéliser des contraintes.
+Résolvez ce problème avec IPOPT et faites afficher la solution.
+Quel est le statut final d'IPOPT ?
+Validez manuellement que la solution vérifie les contraintes.
+Faites afficher le résidu des contraintes calculé par IPOPT ainsi que la norme du gradient du lagrangien, contenues dans `stats.primal_feas` et `stats.dual_feas`, respectivement.
+-->
+
+# Modélisation d'un problème dégénéré
+
+Modéliser le problème
+$$
+\min_{x \in \mathbb{R}} \ x \quad \text{s.c.} \ x^2 = 0
+$$
+à l'aide de [`ADNLPModels.jl`](https://github.com/JuliaSmoothOptimizers/ADNLPModels.jl) et le résoudre avec IPOPT à l'aide de [`NLPModelsIpopt.jl`](https://github.com/JuliaSmoothOptimizers/NLPModelsIpopt.jl).
+
+Un solveur comme IPOPT ne requiert pas un point initial réalisable.
+Utilisez le point initial $x = 1$.
+
+<!--
+Commentez le statut final d'IPOPT, les résidus d'optimalité, ainsi que la solution finale identifiée.
+Ajoutez vos propres commentaires concernant ce problème d'optimisation.
+-->
