@@ -32,15 +32,36 @@ $$
 $$
 à l'aide de [`ADNLPModels.jl`](https://github.com/JuliaSmoothOptimizers/ADNLPModels.jl) et le résoudre avec IPOPT à l'aide de [`NLPModelsIpopt.jl`](https://github.com/JuliaSmoothOptimizers/NLPModelsIpopt.jl).
 Vous pouvez fournir à IPOPT un point initial de votre choix.
+Il ne requiert pas un point initial réalisable (c'est-à-dire qui satisfait les contraintes).
 
-<!--
 Nous avons vu en classe comment modéliser un problème sans contraintes.
 Dirigez-vous vers https://jso.dev/ADNLPModels.jl/stable/ pour découvrir comment modéliser des contraintes.
-Résolvez ce problème avec IPOPT et faites afficher la solution.
-Quel est le statut final d'IPOPT ?
-Validez manuellement que la solution vérifie les contraintes.
-Faites afficher le résidu des contraintes calculé par IPOPT ainsi que la norme du gradient du lagrangien, contenues dans `stats.primal_feas` et `stats.dual_feas`, respectivement.
--->
+Effectuez les opérations suivantes :
+
+1. résolvez ce problème avec IPOPT et faites afficher la solution ;
+
+```{julia}
+# Insérez votre code ici
+```
+
+2. donnez le statut final d'IPOPT ;
+
+```{julia}
+# Insérez votre code ici
+```
+
+3. Validez manuellement que la solution vérifie les contraintes ;
+
+```{julia}
+# Insérez votre code ici
+```
+
+4. faites afficher les résidu d'optimalité calculés par IPOPT, contenues dans `stats.primal_feas` et `stats.dual_feas`, respectivement.
+   NB: `primal_feas` donne la satisfaction des contraintes et `dual_feas` est la norme du gradient du lagrangien du problème.
+
+```{julia}
+# Insérez votre code ici
+```
 
 # Modélisation d'un problème dégénéré
 
@@ -53,7 +74,13 @@ $$
 Un solveur comme IPOPT ne requiert pas un point initial réalisable.
 Utilisez le point initial $x = 1$.
 
-<!--
+```{julia}
+# Insérez votre code ici
+```
+
 Commentez le statut final d'IPOPT, les résidus d'optimalité, ainsi que la solution finale identifiée.
 Ajoutez vos propres commentaires concernant ce problème d'optimisation.
--->
+
+## Commentaires
+
+<!-- Insérez vos commentaires ci-dessous. -->
