@@ -2,8 +2,8 @@
 title: "Rapport de laboratoire 1: modélisation et résolution de problèmes avec IPOPT"
 subtitle: "MTH8408"
 author:
-  - name: Votre nom
-    email: votre.adresse@polymtl.ca
+  - name: Dawut Esse
+    email: dawut.esse@polymtl.ca
     affiliation:
       - name: Polytechnique Montréal
 format:
@@ -22,6 +22,7 @@ engine: julia
 #| output: false
 using Pkg
 Pkg.activate("rapport_env")    # activate a virtual environment
+Pkg.add(["JuMP", "Ipopt"]);
 ```
 
 # Modélisation d'un problème avec contraintes
@@ -42,18 +43,36 @@ Effectuez les opérations suivantes :
 
 ```{julia}
 # Insérez votre code ici
+using JuMP, Ipopt
+using LinearAlgebra
+
+m1 = Model(Ipopt.Optimizer)
+@variable(m1, x[1:2])
+@NLobjective(m1, Min, (x[1] - 2)^2 + (x[2] - 1)^2)
+@NLconstraint(m1, x[1]^2 - x[2] <= 0)
+@constraint(m1, x[1] + x[2] <= 2)
+
+# Résolution
+optimize!(m1)
+
+# 1. Solution trouvée
+sol1 = value.(x)
+println("Solution x* = ", sol1)
 ```
 
 2. donnez le statut final d'IPOPT ;
 
 ```{julia}
 # Insérez votre code ici
+println("Statut : ", termination_status(m1))
 ```
 
 3. Validez manuellement que la solution vérifie les contraintes ;
 
 ```{julia}
 # Insérez votre code ici
+println("C1 = x1^2 - x2 = ", sol1[1]^2 - sol1[2])
+println("C2 = x1 + x2 =   ", sol1[1] + sol1[2])
 ```
 
 4. faites afficher les résidu d'optimalité calculés par IPOPT, contenues dans `stats.primal_feas` et `stats.dual_feas`, respectivement.
@@ -61,6 +80,36 @@ Effectuez les opérations suivantes :
 
 ```{julia}
 # Insérez votre code ici
+
+using JuMP, Ipopt, LinearAlgebra
+
+# 1. Création du modèle et des contraintes
+m1 = Model(Ipopt.Optimizer)
+@variable(m1, x[1:2])
+@NLobjective(m1, Min, (x[1] - 2)^2 + (x[2] - 1)^2)
+c1 = @NLconstraint(m1, x[1]^2 - x[2] <= 0)
+c2 = @constraint(m1, x[1] + x[2] <= 2)
+
+# 2. Résolution
+optimize!(m1)
+sol1 = value.(x)
+
+# 3. Affichage de la solution
+println("Solution x* = ", sol1)
+
+# 4. Résidus d'optimalité
+# --- primal feasibility
+viol1 = max(sol1[1]^2 - sol1[2], 0.0)
+viol2 = max(sol1[1] + sol1[2] - 2, 0.0)
+println("Primal feas (max violation): ", max(viol1, viol2))
+
+# --- dual feasibility
+λ1 = dual(c1)
+λ2 = dual(c2)
+g1 = 2*(sol1[1] - 2) + λ1*2*sol1[1] + λ2
+g2 = 2*(sol1[2] - 1) - λ1 + λ2
+println("Dual feas (norm grad Lagrangien): ", norm([g1, g2]))
+
 ```
 
 # Modélisation d'un problème dégénéré
@@ -76,6 +125,36 @@ Utilisez le point initial $x = 1$.
 
 ```{julia}
 # Insérez votre code ici
+###############################################################################
+# 0.  Packages
+using ADNLPModels          # description du problème
+using NLPModelsIpopt       # appel d'IPOPT
+
+# 1.  Définition du problème
+f(x) = x[1]                # objectif
+c(x) = [x[1]^2]            # contrainte  g(x) = 0
+x0    = [1.0]              # point initial (non réalisable)
+
+nlp = ADNLPModel(
+         f, x0;            # objectif + point initial
+         c   = c,          # fonction de contraintes
+         lcon = [0.0],     # bornes inférieures
+         ucon = [0.0]      # bornes supérieures
+       )
+
+# 2.  Appel d’IPOPT
+stats = ipopt(nlp; print_level = 5)      # ou print_level = 0 pour silence
+
+# 3.  Résumé rapide
+println("\n======= IPOPT =======")
+println("Statut    : ", stats.status)
+println("Itérations: ", stats.iter)
+println("x*        : ", stats.solution)
+println("f(x*)     : ", stats.objective)
+println("‖g(x*)‖   : ", stats.primal_feas)   # violation contrainte
+println("‖∇ₓL‖     : ", stats.dual_feas)     # résidu dual
+###############################################################################
+
 ```
 
 Commentez le statut final d'IPOPT, les résidus d'optimalité, ainsi que la solution finale identifiée.
@@ -84,3 +163,4 @@ Ajoutez vos propres commentaires concernant ce problème d'optimisation.
 ## Commentaires
 
 <!-- Insérez vos commentaires ci-dessous. -->
+Dans le cadre de la modélisation d’un problème dégénéré, le résumé IPOPT affichant status = unknown, iter = –1, un pas gigantesque vers −1.8 × 10²⁰ et un résidu primal nul révèle que la contrainte x^2=0 n’a pas été transmise au modèle : IPOPT s’est donc retrouvé sans aucune restriction, a constaté que l’objectif linéaire f(x)=x est non borné vers −∞ et a quitté aussitôt avec un gradient infini.
