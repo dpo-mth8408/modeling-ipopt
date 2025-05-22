@@ -133,5 +133,5 @@ Ajoutez vos propres commentaires concernant ce problème d'optimisation.
 
 <!-- Insérez vos commentaires ci-dessous. -->
 Ipopt annonce avoir trouvé une solution optimale. La solution qu'il retourne est 6.1035e-5. On se rend compte dans le résultat que la valeur de la violation des contraintes n'est pas nul tandisque le gradient du lagrangien vaut 0.
-Le résultat obtenu n'est pas la valeur exacte attendu.
+Le résultat obtenu n'est pas la valeur exacte attendu, surement du à un arrondi dans le calcul numérique.
 La solution touvée est très proche de la solution réelle mais ne l'atteint pas, de plus le solveur met 14 itérations (beaucoup plus que le problème précédent).
