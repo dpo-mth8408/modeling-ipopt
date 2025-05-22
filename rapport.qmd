@@ -2,8 +2,8 @@
 title: "Rapport de laboratoire 1: modélisation et résolution de problèmes avec IPOPT"
 subtitle: "MTH8408"
 author:
-  - name: Votre nom
-    email: votre.adresse@polymtl.ca
+  - name: Joey Van Melle
+    email: "joey.van-melle@polymtl.ca"
     affiliation:
       - name: Polytechnique Montréal
 format:
@@ -42,18 +42,36 @@ Effectuez les opérations suivantes :
 
 ```{julia}
 # Insérez votre code ici
+Pkg.add("ADNLPModels")
+Pkg.add("NLPModelsIpopt")
+using ADNLPModels, NLPModelsIpopt
+
+f(x) = (x[1] - 2)^2 + (x[2] - 1)^2
+x0 = ones(2)
+c(x) = [x[1]^2 - x[2], x[1] + x[2]]
+lcon = [-Inf, -Inf]
+ucon = [0.0, 2.0]
+
+nlp = ADNLPModel(f, x0, c, lcon, ucon)
+stats = ipopt(nlp)
+println("Solution : ", stats.solution)
 ```
+
+
 
 2. donnez le statut final d'IPOPT ;
 
 ```{julia}
-# Insérez votre code ici
+println("Statut : ", stats.status, ". Équivalent à 'Exit : Optimal Solution Found.'")
 ```
 
 3. Validez manuellement que la solution vérifie les contraintes ;
 
 ```{julia}
-# Insérez votre code ici
+x = stats.solution
+println(c(x) - ucon)
+println(c(x) <= ucon)
+println("On en déduit que les contraintes ne sont pas satisfaites.")
 ```
 
 4. faites afficher les résidu d'optimalité calculés par IPOPT, contenues dans `stats.primal_feas` et `stats.dual_feas`, respectivement.
@@ -61,6 +79,8 @@ Effectuez les opérations suivantes :
 
 ```{julia}
 # Insérez votre code ici
+println("satisfaction des contraintes : ", stats.primal_feas)
+println("norme du gradient du lagrangien du problème : ", stats.dual_feas)
 ```
 
 # Modélisation d'un problème dégénéré
@@ -75,7 +95,21 @@ Un solveur comme IPOPT ne requiert pas un point initial réalisable.
 Utilisez le point initial $x = 1$.
 
 ```{julia}
-# Insérez votre code ici
+# Insérez votre code 
+f(x) = x[1]
+x0 = [1.0]
+c(x) = [x[1]^2]
+lcon = [0.0]
+ucon = [0.0]
+
+nlp = ADNLPModel(f, x0, c, lcon, ucon)
+stats = ipopt(nlp)
+println(stats.solution)
+println(stats.status)
+println(" Équivalent à 'Exit : Optimal Solution Found' ")
+println("satisfaction des contraintes : ", stats.primal_feas)
+println("norme du gradient du lagrangien du problème : ", stats.dual_feas)
+
 ```
 
 Commentez le statut final d'IPOPT, les résidus d'optimalité, ainsi que la solution finale identifiée.
@@ -84,3 +118,13 @@ Ajoutez vos propres commentaires concernant ce problème d'optimisation.
 ## Commentaires
 
 <!-- Insérez vos commentaires ci-dessous. -->
+
+# Statut final d'IPOPT : first_order stationary
+# Résidus d'optimalité : 
+#  - Satisfaction des contraintes : 3.725290298461914e-9
+#  - Norme du gradient du lagrangien du problème : 0.0
+# Solution finale identifiée : x*  =6.103515625e-5
+# Note : Ces valeurs ont été obtenues avec la version 1.6 de Julia. Toutefois, la version 1.10 est nécessaire pour utiliser Quarto.
+# Commentaires sur le problème : 
+La contrainte du problème aurait pu être linéarisée en posant x = 0 plutôt que x^2 = 0. Puisque la fonction objectif est aussi linéaire, on aurait obtenu un problème d'optimisation linéaire résolvable via la méthode du simplexe par exemple. En réalité, le domaine réalisable est en fait un seul point. Il y a donc qu'une seule solution, qui est la solution optimale (x* = 0). Notons que l'algorithme utilisé a pris 14 itérations pour converger vers
+une valeur qui ne respecte pas les contraintes du problème. On en déduit qu'il existe des problèmes non-linéaire très simple qui sont difficile à résoudre numériquement à partir d'algorithme. Il faut donc toujours vérifier s'il y a un moyen de simplifier des contraintes et/ou la fonction objectif avant d'utiliser des algorithmes numériques.
