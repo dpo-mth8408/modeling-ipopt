@@ -2,7 +2,7 @@
 title: "Rapport de laboratoire 1: modélisation et résolution de problèmes avec IPOPT"
 subtitle: "MTH8408"
 author:
-  - name: Votre nom
+  - name: Nicolas Jouglet
     email: votre.adresse@polymtl.ca
     affiliation:
       - name: Polytechnique Montréal
@@ -41,26 +41,62 @@ Effectuez les opérations suivantes :
 1. résolvez ce problème avec IPOPT et faites afficher la solution ;
 
 ```{julia}
-# Insérez votre code ici
+using ADNLPModels, NLPModelsIpopt
+
+# Définition de la fonction objectif
+f(x) = (x[1] - 2)^2 + (x[2] - 1)^2
+
+
+# Contraintes
+c(x) = [x[1]^2 - x[2], x[1] + x[2] - 2]
+
+
+# Point initial
+x0 = [1.0, 1.0]
+
+lcon = [-Inf, -Inf]
+ucon = [0.0, 0.0]
+lvar=[-Inf, -Inf]
+uvar=[Inf, Inf]
+
+# Modélisation
+model = ADNLPModel(f, x0, lvar, uvar, c, lcon , ucon )
+# Résolution avec IPOPT
+result = ipopt(model)
+
+# Affichage de la solution
+result.solution
 ```
 
 2. donnez le statut final d'IPOPT ;
 
 ```{julia}
-# Insérez votre code ici
+result.status
 ```
 
 3. Validez manuellement que la solution vérifie les contraintes ;
 
 ```{julia}
-# Insérez votre code ici
+
+
+cx = c(result.solution)
+
+if all(cx .<= 0)
+    println("Toutes les contraintes sont respectées.")
+else
+    println(" Certaines contraintes ne sont pas respectées.")
+    println("Valeurs des contraintes : ", cx)
+end
+
+
 ```
 
 4. faites afficher les résidu d'optimalité calculés par IPOPT, contenues dans `stats.primal_feas` et `stats.dual_feas`, respectivement.
    NB: `primal_feas` donne la satisfaction des contraintes et `dual_feas` est la norme du gradient du lagrangien du problème.
 
 ```{julia}
-# Insérez votre code ici
+result.primal_feas
+result.dual_feas
 ```
 
 # Modélisation d'un problème dégénéré
@@ -75,7 +111,19 @@ Un solveur comme IPOPT ne requiert pas un point initial réalisable.
 Utilisez le point initial $x = 1$.
 
 ```{julia}
-# Insérez votre code ici
+f(x)=x[1]
+c(x)=[x[1]^2]
+lvar=[-Inf]
+uvar=[Inf]
+lcon=[0.0]
+ucon=[0.0]
+x0=[1.0]
+model = ADNLPModel(f, x0, lvar, uvar, c, lcon , ucon )
+# Résolution avec IPOPT
+result = ipopt(model)
+
+# Affichage de la solution
+result.solution
 ```
 
 Commentez le statut final d'IPOPT, les résidus d'optimalité, ainsi que la solution finale identifiée.
@@ -84,3 +132,6 @@ Ajoutez vos propres commentaires concernant ce problème d'optimisation.
 ## Commentaires
 
 <!-- Insérez vos commentaires ci-dessous. -->
+Ipopt annonce avoir trouvé une solution optimale. La solution qu'il retourne est 6.1035e-5. On se rend compte dans le résultat que la valeur de la violation des contraintes n'est pas nul tandisque le gradient du lagrangien vaut 0.
+Le résultat obtenu n'est pas la valeur exacte attendu, surement du à un arrondi dans le calcul numérique.
+La solution touvée est très proche de la solution réelle mais ne l'atteint pas, de plus le solveur met 14 itérations (beaucoup plus que le problème précédent).
