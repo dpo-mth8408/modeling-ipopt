@@ -2,8 +2,8 @@
 title: "Rapport de laboratoire 1: modélisation et résolution de problèmes avec IPOPT"
 subtitle: "MTH8408"
 author:
-  - name: Votre nom
-    email: votre.adresse@polymtl.ca
+  - name: Oihan Cordelier
+    email: oihan.cordelier@polymtl.ca
     affiliation:
       - name: Polytechnique Montréal
 format:
@@ -22,6 +22,22 @@ engine: julia
 #| output: false
 using Pkg
 Pkg.activate("rapport_env")    # activate a virtual environment
+
+# ------- Makes sure the correct packages are installed in the environment -------
+Pkg.instantiate()
+
+required_packages = [
+  "ADNLPModels",
+  "NLPModelsIpopt"
+]
+
+for pkg in required_packages
+  if isnothing(Base.find_package(pkg))
+    Pkg.add(pkg)
+  end
+end
+
+using ADNLPModels, NLPModelsIpopt
 ```
 
 # Modélisation d'un problème avec contraintes
@@ -42,18 +58,56 @@ Effectuez les opérations suivantes :
 
 ```{julia}
 # Insérez votre code ici
+# ------- Probleme 1 -------
+
+f(x) = (x[1] - 2.0)^2.0 + (x[2] - 1.0)^2.0    # Defines the objective function
+x0 = [5.0, 5.0]               # Defines the starting point
+lvar = [-Inf, -Inf]           # Defines the lower and upper boundary of the 
+# domain in R^2
+uvar = [Inf, Inf]
+
+c(x) = [x[1]^2.0 - x[2]; x[1] + x[2]] # Defines the constraints
+lcon = [-Inf, -Inf]                   # Defines the lower and the upper 
+# boundary of the constraints
+ucon = [0.0, 2.0]
+
+nlp = ADNLPModel(f, x0, lvar, uvar, c, lcon, ucon)    # Creates the ADNLP model
+
+# Solves the ADNLP model using ipopt
+stats = ipopt(nlp, print_level=5, output_file="ipopt_log_problem1.txt")   
+# print_level=5 --> prints iteration data
+
+println("------- Solution -------")
+x_star = stats.solution
+f_star = stats.objective
+println("x_star= ", x_star)
+println("f_star= ", f_star)
 ```
 
 2. donnez le statut final d'IPOPT ;
 
 ```{julia}
 # Insérez votre code ici
+# Prints all the possible variables of stats
+# println(fieldnames(typeof(stats)))
+
+# Prints the final status of the ipopt solver
+println("------- Final status -------")
+println(stats.status)
 ```
 
 3. Validez manuellement que la solution vérifie les contraintes ;
 
 ```{julia}
 # Insérez votre code ici
+println("------- Constraint violation -------")
+x_star = stats.solution
+c_star = c(x_star)
+# The upper boundaries of the constraints are [0.0, 2.0], which are respected in this case
+
+eps = 1.0e-6
+println("c_1 respected?   ", c_star[1] <= ucon[1] + eps)
+println("c_2 respected?   ", c_star[2] <= ucon[2] + eps)
 ```
 
 4. faites afficher les résidu d'optimalité calculés par IPOPT, contenues dans `stats.primal_feas` et `stats.dual_feas`, respectivement.
@@ -61,6 +115,8 @@ Effectuez les opérations suivantes :
 
 ```{julia}
 # Insérez votre code ici
+println("Primal feasibility=  ", stats.primal_feas)
+println("Dual feasibility=    ", stats.dual_feas)
 ```
 
 # Modélisation d'un problème dégénéré
@@ -76,6 +132,32 @@ Utilisez le point initial $x = 1$.
 
 ```{julia}
 # Insérez votre code ici
+
+f(x) = x[1]
+x0 = [1.0]
+lvar = [-Inf]
+uvar = [Inf]
+
+# The equality constraint is modeled with 2 inequality constraints 0 <= c(x) <= 0
+c(x) = [x[1]^2.0]
+lcon = [0.0]
+ucon = [0.0]
+
+nlp = ADNLPModel(f, x0, lvar, uvar, c, lcon, ucon)
+
+stats = ipopt(nlp, print_level=5, output_file="ipopt_log_problem2.txt")
+
+println("------- Solution -------")
+println(stats)
+
+println("------- Solution -------")
+println("x_star= ", stats.solution)
+println("f_star= ", stats.objective)
+
+println("------- Optimality residuals -------")
+println("Primal feasibility=  ", stats.primal_feas)
+println("Dual feasibility=    ", stats.dual_feas)
+
 ```
 
 Commentez le statut final d'IPOPT, les résidus d'optimalité, ainsi que la solution finale identifiée.
@@ -84,3 +166,7 @@ Ajoutez vos propres commentaires concernant ce problème d'optimisation.
 ## Commentaires
 
 <!-- Insérez vos commentaires ci-dessous. -->
+1. IpOpt réussi à résoudre le problème. Il trouve la seule solution possible qui permet de respecter l'unique contrainte, soit : $x = 0$. Le statut *Optimal Solution Found* avec *first-order-* permet de le confirmer.
+2. Cependant, l'erreur sur $x^\ast$ (et donc sur $f^\ast aussi) est plus importante que pour le premier problème. Cela est confirmé en comparant la valeur de *stats.primal_feas* qui est de 0.0 et de 3.7e-9 pour les problèmes 1 et 2 respectivement. 
+3. La contrainte d'égalité est difficile à résoudre pour le solveur tel qu'employé. Le résultat attendu aurait été de 0, mais la valeur finale est de 6.1e-5. Comme mentionné aux points 1 et 2, le problème peut être considéré comme résolu, mais il a une erreur plus importante.
+
