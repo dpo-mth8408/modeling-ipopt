@@ -3,7 +3,7 @@ title: "Rapport de laboratoire 1: modélisation et résolution de problèmes ave
 subtitle: "MTH8408"
 author:
   - name: Mouhtal Oussama
-    email: votre.adresse@polymtl.ca
+    email: oussama-2.mouhtal@polymtl.ca
     affiliation:
       - name: Polytechnique Montréal
 format:
