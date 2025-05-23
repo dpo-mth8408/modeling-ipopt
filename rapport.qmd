@@ -2,7 +2,7 @@
 title: "Rapport de laboratoire 1: modélisation et résolution de problèmes avec IPOPT"
 subtitle: "MTH8408"
 author:
-  - name: Votre nom
+  - name: Mouhtal Oussama
     email: votre.adresse@polymtl.ca
     affiliation:
       - name: Polytechnique Montréal
@@ -21,7 +21,9 @@ engine: julia
 ```{julia}
 #| output: false
 using Pkg
-Pkg.activate("rapport_env")    # activate a virtual environment
+Pkg.activate("rapport_env")    # activate a virtualenvironment
+Pkg.add("ADNLPModels")
+Pkg.add("NLPModelsIpopt")
 ```
 
 # Modélisation d'un problème avec contraintes
@@ -41,26 +43,51 @@ Effectuez les opérations suivantes :
 1. résolvez ce problème avec IPOPT et faites afficher la solution ;
 
 ```{julia}
-# Insérez votre code ici
+using ADNLPModels, NLPModelsIpopt
+
+# The objective function
+f(x) = (x[1] - 2)^2 + (x[2] - 1)^2
+
+# Constraints as function
+c(x) = [x[1]^2 - x[2]; x[1] + x[2]]
+
+lcon = [-Inf, -Inf]
+ucon = [0.0, 2.0]
+# Initial guess
+x0 = [0.0; 0.0]
+nlp = ADNLPModel(f, x0, c, lcon,  ucon)
+
+stats = ipopt(nlp)
 ```
 
 2. donnez le statut final d'IPOPT ;
 
 ```{julia}
-# Insérez votre code ici
+println(stats.status)
 ```
 
 3. Validez manuellement que la solution vérifie les contraintes ;
 
 ```{julia}
-# Insérez votre code ici
+x_sol = stats.solution
+println(" x_sol[1]^2 - x_sol[2]  = ", x_sol[1]^2 - x_sol[2])
+println(" x_sol[1] + x_sol[2] = ", x_sol[1] + x_sol[2])
+
+eps = 1e-8
+
+if  (x_sol[1]^2 - x_sol[2] <= eps) && ( x_sol[1] + x_sol[2] <= 2 + 2*eps)
+    println("La solution satisfait les contraintes.")
+else
+    println("La solution ne satisfait pas les contraintes.")
+end
 ```
 
 4. faites afficher les résidu d'optimalité calculés par IPOPT, contenues dans `stats.primal_feas` et `stats.dual_feas`, respectivement.
    NB: `primal_feas` donne la satisfaction des contraintes et `dual_feas` est la norme du gradient du lagrangien du problème.
 
 ```{julia}
-# Insérez votre code ici
+println("Résidu primal : ", stats.primal_feas)
+println("Résidu dual : ", stats.dual_feas)
 ```
 
 # Modélisation d'un problème dégénéré
@@ -75,7 +102,25 @@ Un solveur comme IPOPT ne requiert pas un point initial réalisable.
 Utilisez le point initial $x = 1$.
 
 ```{julia}
-# Insérez votre code ici
+# The objective function
+f(x) = x[1]
+
+# Constraints
+c(x) = x[1]^2
+
+lcon = [0.0]
+ucon = [0.0]
+
+# Initial guess
+x0 = [1.0]
+
+
+
+nlp = ADNLPModel(f, x0, c, lcon,  ucon)
+
+stats = ipopt(nlp)
+
+println(stats)
 ```
 
 Commentez le statut final d'IPOPT, les résidus d'optimalité, ainsi que la solution finale identifiée.
@@ -83,4 +128,4 @@ Ajoutez vos propres commentaires concernant ce problème d'optimisation.
 
 ## Commentaires
 
-<!-- Insérez vos commentaires ci-dessous. -->
+Le problème est facile à résoudre manuellement, mais la méthode itérative utilisée peine à trouver la solution. (point stationnaire) Le solveur parvient néanmoins à trouver la solution optimale. Le résidu primal nul confirme que la contrainte est satisfaite, et la faible norme du gradient lagrangien confirme l'optimalité locale.
