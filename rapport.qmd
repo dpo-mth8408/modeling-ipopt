@@ -167,6 +167,6 @@ Ajoutez vos propres commentaires concernant ce problème d'optimisation.
 
 <!-- Insérez vos commentaires ci-dessous. -->
 1. IpOpt réussi à résoudre le problème. Il trouve la seule solution possible qui permet de respecter l'unique contrainte, soit : $x = 0$. Le statut *Optimal Solution Found* avec *first-order-* permet de le confirmer.
-2. Cependant, l'erreur sur $x^\ast$ (et donc sur $f^\ast aussi) est plus importante que pour le premier problème. Cela est confirmé en comparant la valeur de *stats.primal_feas* qui est de 0.0 et de 3.7e-9 pour les problèmes 1 et 2 respectivement. 
+2. Cependant, l'erreur sur $x^\ast$ (et donc sur $f^\ast$ aussi) est plus importante que pour le premier problème. Cela est confirmé en comparant la valeur de *stats.primal_feas* qui est de 0.0 et de 3.7e-9 pour les problèmes 1 et 2 respectivement. 
 3. La contrainte d'égalité est difficile à résoudre pour le solveur tel qu'employé. Le résultat attendu aurait été de 0, mais la valeur finale est de 6.1e-5. Comme mentionné aux points 1 et 2, le problème peut être considéré comme résolu, mais il a une erreur plus importante.
 
